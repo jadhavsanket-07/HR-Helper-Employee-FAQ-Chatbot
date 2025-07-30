@@ -1,4 +1,5 @@
-💬 HR-Helper: Employee FAQ Chatbot
+💬 HR Helper: Employee FAQ Chatbot
+
 Your 24/7 Smart HR Support Assistant
 
 HRHelper is an intelligent Slack chatbot built to automate employee interactions by answering frequently asked HR-related questions—like leave policies, benefits, working hours, and more.
