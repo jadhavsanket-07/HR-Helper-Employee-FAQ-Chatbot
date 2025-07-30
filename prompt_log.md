@@ -1,4 +1,4 @@
-# Prompt Log for HRHelper Chatbot
+# Prompt Log for HR Helper Chatbot
 
 ## Interaction on 2025-07-30 18:26:10
 **User Question**: Hi
