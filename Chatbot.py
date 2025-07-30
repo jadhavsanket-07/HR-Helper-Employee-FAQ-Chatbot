@@ -3,15 +3,16 @@ import re
 import requests
 import json
 import logging
+from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect
 from rapidfuzz import process, fuzz
 
 app = Flask(__name__)
 
-# Path to FAQ JSON file
+# Path FAQ JSON file
 file_path = r"D:\07-SANKET\Task\data.json"
 
-# Load FAQ dataset
+# FAQ dataset
 with open(file_path, "r", encoding="utf-8") as f:
     faq_data = json.load(f)
 
@@ -23,6 +24,21 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(message)s'
 )
+
+PROMPT_LOG_PATH = "prompt_log.md"
+
+
+def log_prompt_interaction(user_question, bot_response):
+    """Append interaction log entry to prompt_log.md in markdown format"""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    entry = (
+        f"## Interaction on {timestamp}\n"
+        f"**User Question**: {user_question}\n\n"
+        f"**Bot Response**: {bot_response}\n\n"
+        "---\n\n"
+    )
+    with open(PROMPT_LOG_PATH, "a", encoding="utf-8") as log_file:
+        log_file.write(entry)
 
 
 @app.route("/")
@@ -50,10 +66,13 @@ def chat():
     if score >= threshold:
         answer = next(item["answer"]
                       for item in faq_data if item["question"] == matched_question)
-        return jsonify({"answer": answer})
     else:
         logging.info(f"Unknown question: {user_message}")
-        return jsonify({"answer": "Sorry, I don't have an answer for that. We'll review your question soon."})
+        answer = "Sorry, I don't have an answer for that. We'll review your question soon."
+
+    log_prompt_interaction(user_message, answer)
+
+    return jsonify({"answer": answer})
 
 
 @app.route("/slack/events", methods=["POST"])
@@ -84,6 +103,8 @@ def slack_events():
             else:
                 answer = "Sorry, I don't have an answer for that. We'll review your question soon."
                 logging.info(f"Unknown Slack question: {cleaned_text}")
+
+            log_prompt_interaction(cleaned_text, answer)
 
             bot_token = os.getenv("SLACK_BOT_TOKEN")
             if bot_token:
